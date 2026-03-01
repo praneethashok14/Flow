@@ -1,0 +1,303 @@
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Design tokens ── */
+:root {
+  --sidebar-width: 240px;
+  --nav-height: 52px;
+
+  /* Surfaces */
+  --bg:              #f8f9fa;
+  --sidebar-bg:      #f1f3f4;
+  --nav-bg:          #ffffff;
+  --tab-active-bg:   #ffffff;
+  --addr-bg:         #f1f3f4;
+  --addr-focus-bg:   #ffffff;
+
+  /* Interactive states */
+  --hover:           rgba(60, 64, 67, 0.08);
+  --pressed:         rgba(60, 64, 67, 0.16);
+
+  /* Text */
+  --text:            #202124;
+  --text-muted:      #5f6368;
+
+  /* Borders & shadows */
+  --border:          rgba(0, 0, 0, 0.12);
+  --shadow-tab:      0 1px 3px rgba(60, 64, 67, 0.15), 0 1px 2px rgba(60, 64, 67, 0.10);
+  --shadow-addr:     0 1px 6px rgba(32, 33, 36, 0.28);
+
+  /* Accent — Google Blue */
+  --accent:          #1a73e8;
+  --accent-ring:     rgba(26, 115, 232, 0.4);
+}
+
+/* ── Base ── */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Google Sans", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body { display: flex; }
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════ */
+
+/* macOS traffic-light safe area (titleBarStyle: overlay puts traffic lights
+   at ~y=8 in the window; this 28px strip gives them breathing room and is
+   also the drag region for moving the window). */
+#titlebar {
+  flex-shrink: 0;
+  height: 28px;
+  -webkit-app-region: drag;
+  /* Leaves the left 72px clear for the traffic-light buttons */
+}
+
+#sidebar {
+  position: relative;
+  width: var(--sidebar-width);
+  min-width: 44px;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* ── Drag handle ── */
+#resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 20;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+#resize-handle:hover,
+#resize-handle.dragging {
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+/* ── Tab list ── */
+#tab-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 6px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+
+/* ── Tab item ── */
+.tab-item {
+  display: flex;
+  flex-direction: row;        /* favicon left, title right — always horizontal */
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  height: 36px;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+  transition: background 0.1s;
+  position: relative;
+}
+
+.tab-item:hover  { background: var(--hover); }
+.tab-item.active {
+  background: var(--tab-active-bg);
+  box-shadow: var(--shadow-tab);
+}
+
+/* ── Favicon ── */
+.tab-favicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  object-fit: contain;
+}
+.tab-favicon-placeholder {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #dadce0 0%, #bdc1c6 100%);
+}
+
+/* ── Tab title ── */
+.tab-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+/* ── Close button ── */
+.tab-close {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s;
+  /* Hidden by default; shown as flex when parent tab is hovered */
+  display: none;
+}
+.tab-item:hover .tab-close  { display: flex; }
+.tab-close:hover             { background: var(--hover); color: var(--text); }
+
+/* ── Narrow mode (JS adds .sidebar--narrow when width < 80px) ── */
+#sidebar.sidebar--narrow .tab-title,
+#sidebar.sidebar--narrow .tab-close { display: none; }
+
+#sidebar.sidebar--narrow .tab-item {
+  justify-content: center;
+  padding: 0;
+  gap: 0;
+}
+#sidebar.sidebar--narrow #new-tab-btn {
+  justify-content: center;
+  padding: 0 0 10px;
+}
+
+/* ── New-tab button ── */
+#new-tab-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.1s;
+}
+#new-tab-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+#new-tab-btn:hover { color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════
+   MAIN COLUMN
+═══════════════════════════════════════════════════════ */
+
+#main-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── Nav bar ── */
+#nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 12px;
+  height: var(--nav-height);
+  flex-shrink: 0;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Navigation icon buttons ── */
+.nav-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+.nav-btn svg { width: 18px; height: 18px; }
+.nav-btn:hover   { background: var(--hover);   color: var(--text); }
+.nav-btn:active  { background: var(--pressed); }
+
+/* ── Omnibox wrapper ── */
+#address-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 6px;
+  min-width: 0;
+}
+
+#lock-icon {
+  position: absolute;
+  left: 12px;
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+#address-bar {
+  width: 100%;
+  height: 34px;
+  padding: 0 14px 0 34px;
+  background: var(--addr-bg);
+  border: 1px solid transparent;
+  border-radius: 100px;          /* pill */
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#address-bar::placeholder { color: var(--text-muted); }
+#address-bar:focus {
+  background: var(--addr-focus-bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+/* ── Content area (placeholder; webview floats above it) ── */
+#content-area {
+  flex: 1;
+  background: #ffffff;
+  position: relative;
+}
