@@ -4,7 +4,7 @@
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)
 ![Status](https://img.shields.io/badge/status-finished-green)
 
-A web browser built in Rust, designed around a sidebar tab strip.
+A System WebView based web browser built in Rust, designed around a sidebar tab strip.
 
 <!-- screenshot -->
 
@@ -17,7 +17,7 @@ Flow is a web browser written entirely in Rust. It uses [Tauri](https://tauri.ap
 - Vertical sidebar tab strip
 - Written entirely in Rust
 - Webview layer powered by Tauri and wry
-- Custom rendering pipeline (in development)
+- Custom rendering pipeline
 - Privacy-first defaults
 
 ## Tech Stack
@@ -47,7 +47,7 @@ Building from source will require [Rust](https://rustup.rs/) and the Tauri prere
 ```sh
 git clone https://github.com/praneethashok14/flow
 cd flow
-cargo build
+cargo tauri build
 ```
 
 ## Contributing
